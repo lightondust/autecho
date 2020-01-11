@@ -1,24 +1,22 @@
-console.log('start loading');
-
-let now;
-let endTime;
-let endTimeToUse;
-let startTime;
-let startTimeToUse;
 let history=[];
-
+const ITERATE_TIME=24 * 10;
 
 function getHistory(){
-    now = new Date();
-    endTime = now;
-    startTime= new Date(endTime.getFullYear(), endTime.getMonth(), endTime.getDate(), endTime.getHours()-1);
+    let endTime = new Date();
+    let startTime= new Date(endTime.getFullYear(), endTime.getMonth(), endTime.getDate(), endTime.getHours()-1);
+    counter = 0;
 
-    getHistorySlice();
+    for(i=0; i<ITERATE_TIME; i++){
+        getHistorySlice(endTime, startTime);
+        endTime = startTime;
+        startTime = new Date(endTime.getFullYear(), endTime.getMonth(), endTime.getDate(), endTime.getHours()-1);
+    }
 }
 
-function getHistorySlice(){
-    endTimeToUse = endTime.getTime();
-    startTimeToUse = startTime.getTime();
+function getHistorySlice(endTime, startTime){
+    let endTimeToUse = endTime.getTime();
+    let startTimeToUse = startTime.getTime();
+
     let query = {
         text: '',
         maxResults: 500,
@@ -29,7 +27,5 @@ function getHistorySlice(){
     chrome.history.search(query, function(res){
         history = history.concat(res);
         console.log(res);
-        endTime = startTime;
-        startTime = new Date(endTime.getFullYear(), endTime.getMonth(), endTime.getDate(), endTime.getHours()-1);
     })
 }
