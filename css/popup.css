@@ -1,7 +1,6 @@
 body {
     width: 600px;
-    /*margin: 5px;*/
-    background-color: #fff;
+    background-color: lightcyan;
     min-width: 357px;
     overflow-x: hidden;
     font-family: "Helvetica Neue",Helvetica,"Hiragino Kaku Gothic Pro","Lucida Grande",Verdana,Arial,Meiryo,"メイリオ",sans-serif;
@@ -17,4 +16,19 @@ img {
 
 h1{
     text-align: center;
+}
+
+h2{
+    margin-left: 10px;
+}
+
+#history_element_template{
+    display: none;
+}
+
+button{
+    background-color: bisque;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
