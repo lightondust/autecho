@@ -7,6 +7,8 @@ let historyStatistics={};
 let historyStatisticsArray=[];
 let get_history_button = document.getElementById('get_history_button');
 let detail_id = -1;
+let show_domain_no = 20;
+let show_detail_no = 100;
 
 get_history_button.addEventListener('click', getHistory);
 
@@ -56,7 +58,7 @@ function show_history_statistics(historyStatistics) {
 
     let target_element = document.getElementById('history_results');
     let template_element = document.getElementById('history_element_template');
-    for(let i=0; i<10; i++){
+    for(let i=0; i<show_domain_no; i++){
         let content_element = template_element.cloneNode(true);
         let data_to_show = historyStatisticsArray[i];
 
@@ -116,14 +118,14 @@ function show_detail(i){
 
         domain_detail_array.sort(compare_domain_history_statistics);
 
-        for (let j = 0; j < 100; j++) {
+        for (let j = 0; j < show_detail_no; j++) {
             let item_element = document.createElement('div');
             let item_data = domain_detail_array[j];
             let item_data_detail = item_data['data'];
             let item_data_url = item_data['key'];
             let item_link = document.createElement('a');
             item_link.href = item_data_url;
-            item_link.innerText = item_data_detail['title'];
+            item_link.innerText = item_data_detail['title'] + ' (' + item_data_detail['count'] + ')';
             item_link.target = 'blank';
             item_element.appendChild(item_link);
             wrapper_element.appendChild(item_element);
