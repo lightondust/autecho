@@ -26,9 +26,27 @@ h2{
     display: none;
 }
 
+.history_element{
+    margin-bottom: 5px;
+    margin-left: 10px;
+}
+
 button{
     background-color: bisque;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
+}
+
+#history_detail{
+    max-width: 500px;
+    margin-left: 25px;
+    margin-top: 3px;
+    background-color: aliceblue;
+    max-height: 300px;
+    overflow: scroll;
+}
+
+#history_detail div{
+    margin-bottom: 2px;
 }
