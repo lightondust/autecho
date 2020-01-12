@@ -13,6 +13,10 @@ let show_detail_no = 100;
 get_history_button.addEventListener('click', getHistory);
 
 function getHistory(){
+    // clean old results
+    let old_domain_elements = document.getElementById('history_results');
+    old_domain_elements.innerHTML = '';
+
     endTime = new Date();
     startTime= new Date(endTime.getFullYear(), endTime.getMonth(), endTime.getDate(), endTime.getHours()-1);
     iter_counter = 0;
@@ -53,6 +57,7 @@ function process_after_history_search(res){
 }
 
 function show_history_statistics(historyStatistics) {
+
     historyStatisticsArray = object_to_array(historyStatistics);
     historyStatisticsArray.sort(compare_domain_history_statistics);
 
