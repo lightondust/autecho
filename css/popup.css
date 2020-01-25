@@ -47,6 +47,10 @@ button{
     overflow: scroll;
 }
 
+#history_domain{
+    margin-bottom: 10px;
+}
+
 #history_detail div{
     margin-bottom: 2px;
 }

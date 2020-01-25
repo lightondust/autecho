@@ -5,6 +5,7 @@ let startTime;
 let history=[];
 let historyStatistics={};
 let historyStatisticsArray=[];
+let historyDomainSelected;
 let detail_id = -1;
 let show_domain_no = 100;
 let show_detail_no = 100;
@@ -21,8 +22,6 @@ function regist_current_url(){
             'url': tabs[0].url,
             'title': tabs[0].title
         };
-        console.log(current_tab_contents);
-        console.log(tabs);
         regist_url(current_tab_contents);
     });
 }
@@ -38,8 +37,19 @@ function display_registed_url(tab_contents){
     registed_url_el.innerText = tab_contents.title;
 }
 
+function updateHistoryDomainSelected(){
+    let input_element_list = document.getElementsByClassName('select_history_domain');
+    historyDomainSelected = [];
+    for(let i=0; i<input_element_list.length; i++){
+        if(input_element_list[i].checked){
+            historyDomainSelected.push(input_element_list[i].value);
+        }
+    }
+}
+
 function getHistory(){
     // clean old results
+    updateHistoryDomainSelected();
     let old_domain_elements = document.getElementById('history_results');
     old_domain_elements.innerHTML = '';
 
@@ -72,8 +82,24 @@ function getHistorySlice(){
     chrome.history.search(query, process_after_history_search)
 }
 
+function filter_history_domain(res){
+    if(historyDomainSelected.includes('*')){
+        return res;
+    }
+    let res_clean = [];
+    for(let i=0; i<res.length; i++){
+        let url_str = res[i].url;
+        let url_obj = new URL(url_str);
+        let hostname = url_obj.hostname;
+        if(historyDomainSelected.includes(hostname)){
+            res_clean.push(res[i]);
+        }
+    }
+    return res_clean;
+}
+
 function process_after_history_search(res){
-    history = history.concat(res);
+    history = history.concat(filter_history_domain(res));
     if(iter_counter < ITERATE_TIME){
         getHistorySlice();
     } else{
@@ -150,7 +176,7 @@ function show_detail(i){
         domain_detail_array.sort(compare_domain_history_statistics);
 
         for (let j = 0; j < show_detail_no; j++) {
-            let item_element = document.createElement('div');
+            let item_element = document.createElement('li');
             let item_data = domain_detail_array[j];
             let item_data_detail = item_data['data'];
             let item_data_url = item_data['key'];
