@@ -50,3 +50,8 @@ button{
 #history_detail div{
     margin-bottom: 2px;
 }
+
+.current_contents{
+    margin-top: 5px;
+    text-align: center;
+}

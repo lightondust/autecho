@@ -5,12 +5,38 @@ let startTime;
 let history=[];
 let historyStatistics={};
 let historyStatisticsArray=[];
-let get_history_button = document.getElementById('get_history_button');
 let detail_id = -1;
-let show_domain_no = 20;
+let show_domain_no = 100;
 let show_detail_no = 100;
+let current_tab_contents;
 
+let get_history_button = document.getElementById('get_history_button');
 get_history_button.addEventListener('click', getHistory);
+let regist_current_url_button = document.getElementById('regist_current_url_button');
+regist_current_url_button.addEventListener('click', regist_current_url);
+
+function regist_current_url(){
+    chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+        current_tab_contents = {
+            'url': tabs[0].url,
+            'title': tabs[0].title
+        };
+        console.log(current_tab_contents);
+        console.log(tabs);
+        regist_url(current_tab_contents);
+    });
+}
+
+function regist_url(tab_contents){
+    console.log('regist_url:'+tab_contents);
+    display_registed_url(tab_contents);
+}
+
+function display_registed_url(tab_contents){
+    let registed_url_el = document.getElementById('registed_url');
+    registed_url_el.href = tab_contents.url;
+    registed_url_el.innerText = tab_contents.title;
+}
 
 function getHistory(){
     // clean old results
