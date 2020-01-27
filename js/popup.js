@@ -16,25 +16,43 @@ get_history_button.addEventListener('click', getHistory);
 let regist_current_url_button = document.getElementById('regist_current_url_button');
 regist_current_url_button.addEventListener('click', regist_current_url);
 
+function get_tag(){
+    let if_use_new_tag = document.getElementById('if_use_new_tag').checked;
+    let tag;
+    if(if_use_new_tag){
+        tag = document.getElementById('new_tag_name').value;
+    }else{
+        tag = document.getElementById('selected_tag').value;
+    }
+    return tag
+}
+
 function regist_current_url(){
+    let tag = get_tag();
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         current_tab_contents = {
             'url': tabs[0].url,
-            'title': tabs[0].title
+            'title': tabs[0].title,
+            'time': new Date(),
+            'tag': tag
         };
         regist_url(current_tab_contents);
     });
 }
 
 function regist_url(tab_contents){
-    console.log('regist_url:'+tab_contents);
     display_registed_url(tab_contents);
 }
 
 function display_registed_url(tab_contents){
-    let registed_url_el = document.getElementById('registed_url');
-    registed_url_el.href = tab_contents.url;
-    registed_url_el.innerText = tab_contents.title;
+    let registed_url_link_el = document.getElementById('registed_url');
+    let registed_url_description_el = document.getElementById('registed_url_description');
+    let regist_time = document.getElementById('regist_time');
+
+    registed_url_description_el.innerText = tab_contents['tag'];
+    registed_url_link_el.href = tab_contents.url;
+    registed_url_link_el.innerText = tab_contents.title;
+    regist_time.innerText = tab_contents['time'];
 }
 
 function updateHistoryDomainSelected(){
