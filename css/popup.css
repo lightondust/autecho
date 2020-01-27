@@ -38,8 +38,13 @@ select{
 #control{
     margin-left: 10px;
 }
+
 #tags{
     margin-left: 20px;
+}
+
+#regist_time{
+    margin-top: 5px;
 }
 
 button{

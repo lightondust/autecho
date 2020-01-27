@@ -49,7 +49,7 @@ function display_registed_url(tab_contents){
     let registed_url_description_el = document.getElementById('registed_url_description');
     let regist_time = document.getElementById('regist_time');
 
-    registed_url_description_el.innerText = tab_contents['tag'];
+    registed_url_description_el.innerText = tab_contents['tag']+':';
     registed_url_link_el.href = tab_contents.url;
     registed_url_link_el.innerText = tab_contents.title;
     regist_time.innerText = tab_contents['time'];
