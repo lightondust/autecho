@@ -14,7 +14,8 @@
     "tabs",
     "history",
     "bookmarks",
-    "contextMenus"
+    "contextMenus",
+    "storage"
   ],
   "icons" : {
     "128": "icon.png"

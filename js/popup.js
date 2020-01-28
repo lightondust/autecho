@@ -41,7 +41,11 @@ function regist_current_url(){
 }
 
 function regist_url(tab_contents){
-    display_registed_url(tab_contents);
+    let contents = {};
+    contents[tab_contents['url']] = tab_contents;
+    chrome.storage.sync.set(contents, function() {
+        display_registed_url(tab_contents);
+    })
 }
 
 function display_registed_url(tab_contents){
