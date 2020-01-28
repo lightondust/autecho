@@ -12,11 +12,9 @@ let show_detail_no = 100;
 let current_tab_contents;
 
 let get_history_button = document.getElementById('get_history_button');
-get_history_button.addEventListener('click', getHistory);
 let regist_current_url_button = document.getElementById('regist_current_url_button');
-regist_current_url_button.addEventListener('click', regist_current_url);
 
-function get_tag(){
+function get_tag_to_regist(){
     let if_use_new_tag = document.getElementById('if_use_new_tag').checked;
     let tag;
     if(if_use_new_tag){
@@ -28,7 +26,7 @@ function get_tag(){
 }
 
 function regist_current_url(){
-    let tag = get_tag();
+    let tag = get_tag_to_regist();
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         current_tab_contents = {
             'url': tabs[0].url,
@@ -45,6 +43,7 @@ function regist_url(tab_contents){
     contents[tab_contents['url']] = tab_contents;
     chrome.storage.sync.set(contents, function() {
         display_registed_url(tab_contents);
+        display_registed_item();
     })
 }
 
@@ -57,6 +56,20 @@ function display_registed_url(tab_contents){
     registed_url_link_el.href = tab_contents.url;
     registed_url_link_el.innerText = tab_contents.title;
     regist_time.innerText = tab_contents['time'];
+}
+
+function display_registed_item(){
+    chrome.storage.sync.get(null, function(registed_urls){
+        let target_element = document.getElementById('items');
+        target_element.innerHTML = '';
+        registed_urls = object_to_array(registed_urls);
+        for(let i=0; i<registed_urls.length; i++){
+            let item_element = document.createElement('li');
+            let item = registed_urls[i]['data'];
+            item_element.innerText = item.title + ' ' + item.tag;
+            target_element.appendChild(item_element);
+        }
+    })
 }
 
 function updateHistoryDomainSelected(){
@@ -188,7 +201,7 @@ function show_detail(i){
         detail_id = i;
 
         let target_element = document.getElementById('history_element_' + i);
-        let wrapper_element = document.createElement('div');
+        let wrapper_element = document.createElement('ul');
         let domain_data = historyStatisticsArray[i]['data'];
         let domain_detail_array = object_to_array(domain_data['details']);
 
@@ -237,3 +250,7 @@ function compare_detail_history_statistics(detail1, detail2){
     }
 }
 
+display_registed_item();
+
+get_history_button.addEventListener('click', getHistory);
+regist_current_url_button.addEventListener('click', regist_current_url);

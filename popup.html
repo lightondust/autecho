@@ -9,19 +9,22 @@
 
     <h1 id="title"> Autecho</h1>
 
+    <!--to regist-->
     <div id="control">
       <button id="regist_current_url_button">regist current url</button>
       <div id="tags">
         <br />
         Tag:
-        <select name='tag' id="selected_tag">
-            <option value="embeddings">embeddings</option>
-            <option value="chrome extension">chrome extension</option>
-            <option value="javascript">javascript</option>
-        </select>
-        <span style="width: 10px; display: inline-block"></span>
-        <input type="checkbox" id="if_use_new_tag">New tag
-        <input type="text" id="new_tag_name">
+        <label>
+          <select name='tag' id="selected_tag">
+              <option value="embeddings">embeddings</option>
+              <option value="chrome extension">chrome extension</option>
+              <option value="javascript">javascript</option>
+          </select>
+          <span style="width: 10px; display: inline-block"></span>
+          <input type="checkbox" id="if_use_new_tag">New tag
+          <input type="text" id="new_tag_name">
+        </label>
       </div>
       <div class="current_contents" id="current_contents">
         <span id="registed_url_description"></span>
@@ -31,15 +34,17 @@
       </div>
     </div>
 
+    <!--show regist contents-->
     <div id="item_block">
       <h2 class='title' id="item_block_title">
         Items
       </h2>
       <div></div>
-      <div id="items">
-      </div>
+      <ul id="items">
+      </ul>
     </div>
 
+    <!--settings for record-->
     <div id="record_block">
       <h2 class='title' id="record_title">
           Record
@@ -50,24 +55,28 @@
       </div>
     </div>
 
+    <!--on history-->
     <div id="history">
       <h2 class='title' id="history_title">
         History
         <button id="get_history_button">Get History</button>
       </h2>
       <div id="history_domain">
-        <input class='select_history_domain' type="checkbox" checked="checked" value="qiita.com">Qiita
-        <input class='select_history_domain' type="checkbox" checked="checked" value="github.com">GitHub
-        <input class='select_history_domain' type="checkbox" checked="checked" value="arxiv.org">arXiv
-        <input class='select_history_domain' type="checkbox" checked="checked" value="scholar.google.com">google scholar
-        <input class='select_history_domain' type="checkbox" checked="checked" value="stackoverflow.com">Stack Overflow
-        <input class='select_history_domain' type="checkbox" checked="checked" value="medium.com">Medium
-        <input class='select_history_domain' type="checkbox" value="*">All
+        <label>
+          <input class='select_history_domain' type="checkbox" checked="checked" value="qiita.com">Qiita
+          <input class='select_history_domain' type="checkbox" checked="checked" value="github.com">GitHub
+          <input class='select_history_domain' type="checkbox" checked="checked" value="arxiv.org">arXiv
+          <input class='select_history_domain' type="checkbox" checked="checked" value="scholar.google.com">google scholar
+          <input class='select_history_domain' type="checkbox" checked="checked" value="stackoverflow.com">Stack Overflow
+          <input class='select_history_domain' type="checkbox" checked="checked" value="medium.com">Medium
+          <input class='select_history_domain' type="checkbox" value="*">All
+        </label>
       </div>
-      <div id="history_results">
-      </div>
+      <ul id="history_results">
+      </ul>
     </div>
 
+    <!--bookmark-->
     <div id="bookmark">
       <h2 class='title' id="bookmark_title">
         Bookmark(under construction)
@@ -78,9 +87,11 @@
     </div>
 
     <div id="templates">
-      <li class="history_element" id="history_element_template">
-        <button>detail</button>
-      </li>
+      <ul>
+        <li class="history_element" id="history_element_template">
+          <button>detail</button>
+        </li>
+      </ul>
     </div>
     <script src="js/popup.js"></script>
   </body>
