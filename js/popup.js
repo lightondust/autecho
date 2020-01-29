@@ -11,8 +11,6 @@ let show_domain_no = 100;
 let show_detail_no = 100;
 let current_tab_contents;
 
-let get_history_button = document.getElementById('get_history_button');
-let regist_current_url_button = document.getElementById('regist_current_url_button');
 
 function get_tag_to_regist(){
     let if_use_new_tag = document.getElementById('if_use_new_tag').checked;
@@ -43,7 +41,7 @@ function regist_url(tab_contents){
     contents[tab_contents['url']] = tab_contents;
     chrome.storage.sync.set(contents, function() {
         display_registed_url(tab_contents);
-        display_registed_item();
+        display_registed_items();
     })
 }
 
@@ -58,7 +56,7 @@ function display_registed_url(tab_contents){
     regist_time.innerText = tab_contents['time'];
 }
 
-function display_registed_item(){
+function display_registed_items(){
     chrome.storage.sync.get(null, function(registed_urls){
         let target_element = document.getElementById('items');
         target_element.innerHTML = '';
@@ -67,6 +65,20 @@ function display_registed_item(){
             let item_element = document.createElement('li');
             let item = registed_urls[i]['data'];
             item_element.innerText = item.title + ' ' + item.tag;
+            target_element.appendChild(item_element);
+        }
+    })
+}
+
+function display_recorded_urls(){
+    chrome.storage.local.get(null, function(recorded_urls){
+        let target_element = document.getElementById('records');
+        target_element.innerHTML = '';
+        recorded_urls = object_to_array(recorded_urls);
+        for(let i=0; i<recorded_urls.length; i++){
+            let item_element = document.createElement('li');
+            let item = recorded_urls[i]['data'];
+            item_element.innerText = item.title;
             target_element.appendChild(item_element);
         }
     })
@@ -250,7 +262,13 @@ function compare_detail_history_statistics(detail1, detail2){
     }
 }
 
-display_registed_item();
+// display_registed_items();
 
+let get_history_button = document.getElementById('get_history_button');
+let regist_current_url_button = document.getElementById('regist_current_url_button');
+let show_record_button = document.getElementById('show_records_button');
+let show_registed_item_button = document.getElementById('show_registed_items_button');
 get_history_button.addEventListener('click', getHistory);
 regist_current_url_button.addEventListener('click', regist_current_url);
+show_record_button.addEventListener('click', display_recorded_urls);
+show_registed_item_button.addEventListener('click', display_registed_items);

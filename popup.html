@@ -17,6 +17,7 @@
         Tag:
         <label>
           <select name='tag' id="selected_tag">
+              <option value="">none</option>
               <option value="embeddings">embeddings</option>
               <option value="chrome extension">chrome extension</option>
               <option value="javascript">javascript</option>
@@ -38,6 +39,7 @@
     <div id="item_block">
       <h2 class='title' id="item_block_title">
         Items
+        <button id="show_registed_items_button">show</button>
       </h2>
       <div></div>
       <ul id="items">
@@ -49,10 +51,11 @@
       <h2 class='title' id="record_title">
           Record
         <button id="record_button">start</button>
+        <button id="show_records_button">show</button>
       </h2>
       <div id="record_status"></div>
-      <div id="records">
-      </div>
+      <ul id="records">
+      </ul>
     </div>
 
     <!--on history-->
