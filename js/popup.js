@@ -10,6 +10,9 @@ let detail_id = -1;
 let show_domain_no = 100;
 let show_detail_no = 100;
 let current_tab_contents;
+let settings_status=false;  // false to hide, true to show
+let server_address;
+let DEFAULT_SERVER_ADDRESS='http://localhost:8009';
 
 
 function get_tag_to_regist(){
@@ -262,13 +265,54 @@ function compare_detail_history_statistics(detail1, detail2){
     }
 }
 
-// display_registed_items();
+function get_server_address(){
+    chrome.storage.sync.get('server_address', function(res){
+        if(res.server_address){
+            server_address = res.server_address;
+        }else{
+            server_address = DEFAULT_SERVER_ADDRESS;
+        }
+    })
+}
+
+function set_server_address(address){
+    chrome.storage.sync.set({'server_address': address}, function(res){
+        server_address = address;
+    });
+}
+
+function switch_setting_view(){
+    get_server_address();
+    let setting_area = document.getElementById('setting_contents');
+    let server_address_element = document.getElementById('server_address');
+    server_address_element.value = server_address;
+    if(settings_status){
+    //    hide settings
+        setting_area.style.display = 'none';
+    }else{
+    //    show settings
+        setting_area.style.display = 'block';
+    }
+    settings_status = !settings_status;
+}
+
+function change_server_address(){
+    let server_address_element = document.getElementById('server_address');
+    let address = server_address_element.value;
+    set_server_address(address);
+}
 
 let get_history_button = document.getElementById('get_history_button');
 let regist_current_url_button = document.getElementById('regist_current_url_button');
 let show_record_button = document.getElementById('show_records_button');
 let show_registed_item_button = document.getElementById('show_registed_items_button');
+let setting_button = document.getElementById('setting_button');
+let change_server_button = document.getElementById('change_server_button');
 get_history_button.addEventListener('click', getHistory);
 regist_current_url_button.addEventListener('click', regist_current_url);
 show_record_button.addEventListener('click', display_recorded_urls);
 show_registed_item_button.addEventListener('click', display_registed_items);
+setting_button.addEventListener('click', switch_setting_view);
+change_server_button.addEventListener('click', change_server_address);
+
+get_server_address();

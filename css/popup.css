@@ -30,6 +30,10 @@ h2{
     margin-bottom: 5px;
 }
 
+.hidden_first{
+    display: none;
+}
+
 select{
     border-radius: 5px;
 }
@@ -51,6 +55,14 @@ button{
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
+}
+
+.setting_button{
+    text-align: right;
+    left: 500px;
+    position: relative;
+    background-color: lightgrey;
+    height: 30px;
 }
 
 #history_detail{

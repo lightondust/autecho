@@ -9,6 +9,18 @@
 
     <h1 id="title"> Autecho</h1>
 
+    <div id="settings">
+      <button class="setting_button" id="setting_button">Settings</button>
+      <div id="setting_contents" class="hidden_first">
+        <ul>
+          <li>
+            Server:
+            <input id="server_address" type="text"> <button id="change_server_button">change</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <!--to regist-->
     <div id="control">
       <button id="regist_current_url_button">regist current url</button>
@@ -29,7 +41,7 @@
       </div>
       <div class="current_contents" id="current_contents">
         <span id="registed_url_description"></span>
-        <a id="registed_url"></a>
+        <a id="registed_url" target="_blank"></a>
         <br/>
         <div id="regist_time"></div>
       </div>
