@@ -52,6 +52,7 @@ function regist_url(tab_contents){
 }
 
 function display_registed_url(tab_contents){
+    get_registed_items();
     let registed_url_link_el = document.getElementById('registed_url');
     let registed_url_description_el = document.getElementById('registed_url_description');
     let regist_time = document.getElementById('regist_time');
@@ -110,32 +111,6 @@ function display_registed_items(){
         }
 
     }
-
-
-    // chrome.storage.sync.get(null, function(registed_urls){
-    //     let target_element = document.getElementById('items');
-    //     target_element.innerHTML = '';
-    //     registed_urls = object_to_array(registed_urls);
-    //     for(let i=0; i<registed_urls.length; i++){
-    //         let item = registed_urls[i];
-    //         let item_data = item['data'];
-    //         if(item['key'].startsWith('http')){
-    //             let item_element = document.createElement('li');
-    //             let item_title_link = document.createElement('a');
-    //             let item_tag = document.createElement('span');
-    //             item_title_link.href = item['key'];
-    //             item_title_link.innerText = item_data.title;
-    //             item_title_link.target = '_blank';
-    //             item_tag.innerText = item_data.tag + ': ';
-    //             item_tag.className = 'item_tag';
-    //             item_element.className = 'item_block';
-    //             item_element.appendChild(item_tag);
-    //             item_element.appendChild(item_title_link);
-    //             target_element.appendChild(item_element);
-    //         }
-    //     }
-    // })
-
 }
 
 function display_recorded_urls(){
@@ -387,52 +362,6 @@ get_server_address();
 get_registed_items();
 
 // dev area
-function change_rec(){
-    chrome.storage.sync.get(null, function(records){
-        records = object_to_array(records);
-        for(let i=0; i<records.length; i++) {
-            let rec = records[i];
-            if(rec['key'].startsWith('http')){
-                let cont_new = {};
-                let time = new Date();
-                cont_new[rec['key']] = rec['data'];
-                cont_new[rec['key']]['type'] = 'item';
-                cont_new[rec['key']]['time'] = time.toLocaleString();
-                chrome.storage.sync.set(cont_new, function(){});
-            }
-        }
-    });
-}
-
-function move_st(){
-    chrome.storage.sync.get(null, function(records){
-        records = object_to_array(records);
-        for(let i=0; i<records.length; i++) {
-            let rec = records[i];
-            if(rec['key'].startsWith('http')){
-                let cont_new = {};
-                cont_new[rec['key']] = rec['data'];
-                chrome.storage.local.set(cont_new, function(){});
-            }
-        }
-    });
-}
-
-function change_rec_local(){
-    chrome.storage.local.get(null, function(records){
-        records = object_to_array(records);
-        for(let i=0; i<records.length; i++) {
-            let rec = records[i];
-            if(rec['key'].startsWith('http')){
-                let cont_new = {};
-                cont_new[rec['key']] = rec['data'];
-                cont_new[rec['key']]['type'] = 'record';
-                chrome.storage.local.set(cont_new, function(){});
-            }
-        }
-    });
-}
-
 function debug_show_storage(st_type){
     if(st_type==='sync'){
         chrome.storage.sync.get(null, function(res){
