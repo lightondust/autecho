@@ -25,12 +25,13 @@ chrome.tabs.onUpdated.addListener( function( tabId,  changeInfo,  tab) {
             contents[tab.url] = {
                 'title': tab.title,
                 'time': time.toLocaleString(),
-                'url': tab.url
+                'url': tab.url,
+                'type': 'record'
             };
-            if(!rec_old.count){
+            if(!rec_old[tab.url].count){
                 contents[tab.url]['count'] = 1;
             }else{
-                contents[tab.url]['count'] = rec_old.count+1;
+                contents[tab.url]['count'] = rec_old[tab.url].count+1;
             }
             chrome.storage.local.set(contents, function(){});
         }

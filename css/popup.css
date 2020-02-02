@@ -46,6 +46,17 @@ select{
     margin-left: 20px;
 }
 
+.item_tag{
+    background-color: yellow;
+    display: inline-block;
+    border-radius: 5px;
+    min-width: 30px;
+}
+
+.item_block{
+    margin-top: 3px;
+}
+
 #regist_time{
     margin-top: 5px;
 }

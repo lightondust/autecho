@@ -10,6 +10,7 @@ let detail_id = -1;
 let show_domain_no = 100;
 let show_detail_no = 100;
 let current_tab_contents;
+let registed_contents;
 let settings_status=false;  // false to hide, true to show
 let server_address;
 let DEFAULT_SERVER_ADDRESS='http://localhost:8009';
@@ -29,11 +30,13 @@ function get_tag_to_regist(){
 function regist_current_url(){
     let tag = get_tag_to_regist();
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+        let time = new Date();
         current_tab_contents = {
             'url': tabs[0].url,
             'title': tabs[0].title,
-            'time': new Date(),
-            'tag': tag
+            'time': time.toLocaleString(),
+            'tag': tag,
+            'type': 'item'
         };
         regist_url(current_tab_contents);
     });
@@ -42,7 +45,7 @@ function regist_current_url(){
 function regist_url(tab_contents){
     let contents = {};
     contents[tab_contents['url']] = tab_contents;
-    chrome.storage.sync.set(contents, function() {
+    chrome.storage.local.set(contents, function() {
         display_registed_url(tab_contents);
         display_registed_items();
     })
@@ -59,18 +62,80 @@ function display_registed_url(tab_contents){
     regist_time.innerText = tab_contents['time'];
 }
 
-function display_registed_items(){
-    chrome.storage.sync.get(null, function(registed_urls){
-        let target_element = document.getElementById('items');
-        target_element.innerHTML = '';
-        registed_urls = object_to_array(registed_urls);
-        for(let i=0; i<registed_urls.length; i++){
-            let item_element = document.createElement('li');
-            let item = registed_urls[i]['data'];
-            item_element.innerText = item.title + ' ' + item.tag;
-            target_element.appendChild(item_element);
+function get_registed_items(){
+    chrome.storage.local.get(null, function(records){
+        records = object_to_array(records);
+        registed_contents = {};
+        for(let i=0; i<records.length; i++){
+            let rec = records[i];
+            let rec_data = rec['data'];
+            let type = rec_data['type'];
+            if(type==='item') {
+                let tag = rec_data['tag'];
+                if (!tag) {
+                    tag = 'none';
+                }
+                if (registed_contents[tag]) {
+                    registed_contents[tag].push(rec);
+                } else {
+                    registed_contents[tag] = [rec];
+                }
+            }
         }
     })
+}
+
+function display_registed_items(){
+    let target_element = document.getElementById('items');
+    target_element.innerHTML = '';
+
+    for(let [tag, items] of Object.entries(registed_contents)){
+        for(let i=0; i<items.length; i++){
+            let item = items[i];
+            let item_data = item['data'];
+            if(item['key'].startsWith('http')){
+                let item_element = document.createElement('li');
+                let item_title_link = document.createElement('a');
+                let item_tag = document.createElement('span');
+                item_title_link.href = item['key'];
+                item_title_link.innerText = item_data.title;
+                item_title_link.target = '_blank';
+                item_tag.innerText = item_data.tag + ': ';
+                item_tag.className = 'item_tag';
+                item_element.className = 'item_block';
+                item_element.appendChild(item_tag);
+                item_element.appendChild(item_title_link);
+                target_element.appendChild(item_element);
+            }
+        }
+
+    }
+
+
+    // chrome.storage.sync.get(null, function(registed_urls){
+    //     let target_element = document.getElementById('items');
+    //     target_element.innerHTML = '';
+    //     registed_urls = object_to_array(registed_urls);
+    //     for(let i=0; i<registed_urls.length; i++){
+    //         let item = registed_urls[i];
+    //         let item_data = item['data'];
+    //         if(item['key'].startsWith('http')){
+    //             let item_element = document.createElement('li');
+    //             let item_title_link = document.createElement('a');
+    //             let item_tag = document.createElement('span');
+    //             item_title_link.href = item['key'];
+    //             item_title_link.innerText = item_data.title;
+    //             item_title_link.target = '_blank';
+    //             item_tag.innerText = item_data.tag + ': ';
+    //             item_tag.className = 'item_tag';
+    //             item_element.className = 'item_block';
+    //             item_element.appendChild(item_tag);
+    //             item_element.appendChild(item_title_link);
+    //             target_element.appendChild(item_element);
+    //         }
+    //     }
+    // })
+
 }
 
 function display_recorded_urls(){
@@ -79,10 +144,13 @@ function display_recorded_urls(){
         target_element.innerHTML = '';
         recorded_urls = object_to_array(recorded_urls);
         for(let i=0; i<recorded_urls.length; i++){
-            let item_element = document.createElement('li');
-            let item = recorded_urls[i]['data'];
-            item_element.innerText = item.title;
-            target_element.appendChild(item_element);
+            let item = recorded_urls[i];
+            let item_data = item['data'];
+            if(item_data['type']==='record'){
+                let item_element = document.createElement('li');
+                item_element.innerText = item_data.title;
+                target_element.appendChild(item_element);
+            }
         }
     })
 }
@@ -316,3 +384,65 @@ setting_button.addEventListener('click', switch_setting_view);
 change_server_button.addEventListener('click', change_server_address);
 
 get_server_address();
+get_registed_items();
+
+// dev area
+function change_rec(){
+    chrome.storage.sync.get(null, function(records){
+        records = object_to_array(records);
+        for(let i=0; i<records.length; i++) {
+            let rec = records[i];
+            if(rec['key'].startsWith('http')){
+                let cont_new = {};
+                let time = new Date();
+                cont_new[rec['key']] = rec['data'];
+                cont_new[rec['key']]['type'] = 'item';
+                cont_new[rec['key']]['time'] = time.toLocaleString();
+                chrome.storage.sync.set(cont_new, function(){});
+            }
+        }
+    });
+}
+
+function move_st(){
+    chrome.storage.sync.get(null, function(records){
+        records = object_to_array(records);
+        for(let i=0; i<records.length; i++) {
+            let rec = records[i];
+            if(rec['key'].startsWith('http')){
+                let cont_new = {};
+                cont_new[rec['key']] = rec['data'];
+                chrome.storage.local.set(cont_new, function(){});
+            }
+        }
+    });
+}
+
+function change_rec_local(){
+    chrome.storage.local.get(null, function(records){
+        records = object_to_array(records);
+        for(let i=0; i<records.length; i++) {
+            let rec = records[i];
+            if(rec['key'].startsWith('http')){
+                let cont_new = {};
+                cont_new[rec['key']] = rec['data'];
+                cont_new[rec['key']]['type'] = 'record';
+                chrome.storage.local.set(cont_new, function(){});
+            }
+        }
+    });
+}
+
+function debug_show_storage(st_type){
+    if(st_type==='sync'){
+        chrome.storage.sync.get(null, function(res){
+            rec_=res;
+            console.log(res);
+        })
+    }else if(st_type==='local'){
+        chrome.storage.local.get(null, function(res){
+            rec_=res;
+            console.log(res);
+        })
+    }
+}
