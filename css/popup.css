@@ -84,7 +84,7 @@ button{
     overflow: scroll;
 }
 
-#history_domain{
+.domain_selection{
     margin-bottom: 10px;
     margin-left: 20px;
 }
