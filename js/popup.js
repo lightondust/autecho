@@ -6,6 +6,7 @@ let history=[];
 let historyStatistics={};
 let historyStatisticsArray=[];
 let historyDomainSelected;
+let recordDomainSelected;
 let detail_id = -1;
 let show_domain_no = 100;
 let show_detail_no = 100;
@@ -154,6 +155,19 @@ function getDomainSelected(domain_type){
         }
     }
     return domain_list;
+}
+
+function displayRecordDomains(){
+    chrome.storage.sync.get('record_domains', function(res){
+        let domains = res['record_domains'];
+        let domain_class_name = 'select_record_domain';
+        let input_element_list = document.getElementsByClassName(domain_class_name);
+        for(let i=0; i<input_element_list.length; i++){
+            let el = input_element_list[i];
+            el.checked = domains.includes(el.value);
+        }
+    });
+
 }
 
 function getHistory(){
@@ -361,8 +375,9 @@ function change_server_address(){
     set_server_address(address);
 }
 
-function change_record_domains(){
-    console.log('change record domains called');
+function changeRecordDomains(){
+    recordDomainSelected = getDomainSelected('record');
+    chrome.storage.sync.set({'record_domains': recordDomainSelected});
 }
 
 let get_history_button = document.getElementById('get_history_button');
@@ -378,10 +393,11 @@ show_record_button.addEventListener('click', display_recorded_urls);
 show_registed_item_button.addEventListener('click', display_registed_items);
 setting_button.addEventListener('click', switch_setting_view);
 change_server_button.addEventListener('click', change_server_address);
-change_record_domains_button.addEventListener('click', change_record_domains);
+change_record_domains_button.addEventListener('click', changeRecordDomains);
 
 get_server_address();
 get_registed_items();
+displayRecordDomains();
 
 // dev area
 function debug_show_storage(st_type){

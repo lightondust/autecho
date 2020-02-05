@@ -1,11 +1,13 @@
-let url_domain_list = [
-    "qiita.com",
-    "github.com",
-    "arxiv.org",
-    "scholar.google.com",
-    "stackoverflow.com",
-    "medium.com"
-];
+let url_domain_list;
+const RECORD_DOMAINS_KEY = 'record_domains';
+
+function get_record_domains(){
+    chrome.storage.sync.get(RECORD_DOMAINS_KEY, function(rec){
+        url_domain_list = rec[RECORD_DOMAINS_KEY];
+    })
+}
+
+get_record_domains();
 
 chrome.contextMenus.create({
   "title" : "このページを登録する(まだ工事中)",
@@ -17,6 +19,7 @@ chrome.contextMenus.create({
 });
 
 chrome.tabs.onUpdated.addListener( function( tabId,  changeInfo,  tab) {
+    get_record_domains();
     chrome.storage.local.get(tab.url, function(rec_old){
         let url = tab.url;
         let time = new Date();
@@ -47,6 +50,9 @@ chrome.tabs.onUpdated.addListener( function( tabId,  changeInfo,  tab) {
 });
 
 function url_domain_filter(url){
+    if(url_domain_list.includes('*')){
+        return true;
+    }
     let url_obj = new URL(url);
     let hostname = url_obj.hostname;
     return url_domain_list.includes(hostname);
