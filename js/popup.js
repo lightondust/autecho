@@ -46,11 +46,13 @@ function regist_url(tab_contents){
     let contents = {};
     contents[tab_contents['url']] = tab_contents;
     chrome.storage.local.get(contents['url'], function(contents_old){
-        if(contents_old[tab_contents['url']]['type'].includes('record')){
-            contents[tab_contents['url']]['type'].push('record');
-        }
-        if(contents_old[tab_contents['url']]['tag'].length){
-            contents[tab_contents['url']]['tag'].push(contents_old[tab_contents['url']]['tag']);
+        if(contents_old[tab_contents['url']]){
+            if(contents_old[tab_contents['url']]['type'].includes('record')){
+                contents[tab_contents['url']]['type'].push('record');
+            }
+            if(contents_old[tab_contents['url']]['tag'].length){
+                contents[tab_contents['url']]['tag'].push(contents_old[tab_contents['url']]['tag']);
+            }
         }
         chrome.storage.local.set(contents, function() {
             display_current_registed_url(tab_contents);
@@ -82,7 +84,7 @@ function get_registed_items(){
             if(type.includes('item')) {
                 let tag = rec_data['tag'];
                 if (!tag.length) {
-                    tag = 'none';
+                    tag = ['none'];
                 }
                 for(let i=0; i<tag.length; i++){
                     let t = tag[i];
