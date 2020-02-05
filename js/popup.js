@@ -35,8 +35,8 @@ function regist_current_url(){
             'url': tabs[0].url,
             'title': tabs[0].title,
             'time': time.toLocaleString(),
-            'tag': tag,
-            'type': 'item'
+            'tag': [tag],
+            'type': ['item']
         };
         regist_url(current_tab_contents);
     });
@@ -45,13 +45,21 @@ function regist_current_url(){
 function regist_url(tab_contents){
     let contents = {};
     contents[tab_contents['url']] = tab_contents;
-    chrome.storage.local.set(contents, function() {
-        display_registed_url(tab_contents);
-        display_registed_items();
-    })
+    chrome.storage.local.get(contents['url'], function(contents_old){
+        if(contents_old[tab_contents['url']]['type'].includes('record')){
+            contents[tab_contents['url']]['type'].push('record');
+        }
+        if(contents_old[tab_contents['url']]['tag'].length){
+            contents[tab_contents['url']]['tag'].push(contents_old[tab_contents['url']]['tag']);
+        }
+        chrome.storage.local.set(contents, function() {
+            display_current_registed_url(tab_contents);
+            display_registed_items();
+        })
+    });
 }
 
-function display_registed_url(tab_contents){
+function display_current_registed_url(tab_contents){
     get_registed_items();
     let registed_url_link_el = document.getElementById('registed_url');
     let registed_url_description_el = document.getElementById('registed_url_description');
@@ -71,15 +79,18 @@ function get_registed_items(){
             let rec = records[i];
             let rec_data = rec['data'];
             let type = rec_data['type'];
-            if(type==='item') {
+            if(type.includes('item')) {
                 let tag = rec_data['tag'];
-                if (!tag) {
+                if (!tag.length) {
                     tag = 'none';
                 }
-                if (registed_contents[tag]) {
-                    registed_contents[tag].push(rec);
-                } else {
-                    registed_contents[tag] = [rec];
+                for(let i=0; i<tag.length; i++){
+                    let t = tag[i];
+                    if (registed_contents[t]) {
+                        registed_contents[t].push(rec);
+                    } else {
+                        registed_contents[t] = [rec];
+                    }
                 }
             }
         }
@@ -121,7 +132,7 @@ function display_recorded_urls(){
         for(let i=0; i<recorded_urls.length; i++){
             let item = recorded_urls[i];
             let item_data = item['data'];
-            if(item_data['type']==='record'){
+            if(item_data['type'].includes('record')){
                 let item_element = document.createElement('li');
                 item_element.innerText = item_data.title;
                 target_element.appendChild(item_element);
@@ -130,19 +141,22 @@ function display_recorded_urls(){
     })
 }
 
-function updateHistoryDomainSelected(){
-    let input_element_list = document.getElementsByClassName('select_history_domain');
+function getDomainSelected(domain_type){
+    let domain_class_name = 'select_' + domain_type + '_domain';
+    let input_element_list = document.getElementsByClassName(domain_class_name);
+    let domain_list = [];
     historyDomainSelected = [];
     for(let i=0; i<input_element_list.length; i++){
         if(input_element_list[i].checked){
-            historyDomainSelected.push(input_element_list[i].value);
+            domain_list.push(input_element_list[i].value);
         }
     }
+    return domain_list;
 }
 
 function getHistory(){
     // clean old results
-    updateHistoryDomainSelected();
+    historyDomainSelected = getDomainSelected('history');
     let old_domain_elements = document.getElementById('history_results');
     old_domain_elements.innerHTML = '';
 
@@ -172,7 +186,7 @@ function getHistorySlice(){
         endTime: endTimeToUse
     };
 
-    chrome.history.search(query, process_after_history_search)
+    chrome.history.search(query, process_after_history_search);
 }
 
 function filter_history_domain(res){
@@ -345,18 +359,24 @@ function change_server_address(){
     set_server_address(address);
 }
 
+function change_record_domains(){
+    console.log('change record domains called');
+}
+
 let get_history_button = document.getElementById('get_history_button');
 let regist_current_url_button = document.getElementById('regist_current_url_button');
 let show_record_button = document.getElementById('show_records_button');
 let show_registed_item_button = document.getElementById('show_registed_items_button');
 let setting_button = document.getElementById('setting_button');
 let change_server_button = document.getElementById('change_server_button');
+let change_record_domains_button = document.getElementById('change_record_domains');
 get_history_button.addEventListener('click', getHistory);
 regist_current_url_button.addEventListener('click', regist_current_url);
 show_record_button.addEventListener('click', display_recorded_urls);
 show_registed_item_button.addEventListener('click', display_registed_items);
 setting_button.addEventListener('click', switch_setting_view);
 change_server_button.addEventListener('click', change_server_address);
+change_record_domains_button.addEventListener('click', change_record_domains);
 
 get_server_address();
 get_registed_items();

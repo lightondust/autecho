@@ -26,12 +26,20 @@ chrome.tabs.onUpdated.addListener( function( tabId,  changeInfo,  tab) {
                 'title': tab.title,
                 'time': time.toLocaleString(),
                 'url': tab.url,
-                'type': 'record'
+                'type': ['record']
             };
-            if(!rec_old[tab.url].count){
+            if(!rec_old[tab.url]){
                 contents[tab.url]['count'] = 1;
             }else{
-                contents[tab.url]['count'] = rec_old[tab.url].count+1;
+                if(!rec_old[tab.url].count){
+                    contents[tab.url]['count'] = 1;
+                }else {
+                    contents[tab.url]['count'] = rec_old[tab.url].count + 1;
+                }
+                if(rec_old[tab.url]['type'].includes('item')){
+                    contents[tab.url]['type'].push('item');
+                    contents[tab.url]['tag'] = rec_old[tab.url]['tag'];
+                }
             }
             chrome.storage.local.set(contents, function(){});
         }
