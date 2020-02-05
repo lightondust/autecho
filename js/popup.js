@@ -17,11 +17,24 @@ let server_address;
 let DEFAULT_SERVER_ADDRESS='http://localhost:8009';
 
 
+function update_tag_options(){
+    let tags = Object.keys(registed_contents);
+    let tags_element = document.getElementById('selected_tag');
+    tags_element.innerHTML = '';
+    for(i=0; i<tags.length; i++){
+        let tag = tags[i];
+        let option_element = document.createElement('option');
+        option_element.value = tag;
+        option_element.innerText = tag;
+        tags_element.appendChild(option_element);
+    }
+}
+
 function get_tag_to_regist(){
-    let if_use_new_tag = document.getElementById('if_use_new_tag').checked;
     let tag;
-    if(if_use_new_tag){
-        tag = document.getElementById('new_tag_name').value;
+    let tag_input = document.getElementById('new_tag_name').value;
+    if(tag_input){
+        tag = [tag_input];
     }else{
         tag = document.getElementById('selected_tag').value;
     }
@@ -97,6 +110,7 @@ function get_registed_items(){
                 }
             }
         }
+        update_tag_options();
     })
 }
 
