@@ -136,7 +136,7 @@ function display_registed_items(){
                 item_title_link.href = item['key'];
                 item_title_link.innerText = item_data.title;
                 item_title_link.target = '_blank';
-                item_tag.innerText = item_data.tag + ': ';
+                item_tag.innerText = tag + ': ';
                 item_tag.className = 'item_tag';
                 item_element.className = 'item_block';
                 item_element.appendChild(item_tag);
@@ -369,7 +369,7 @@ function get_server_address(){
 }
 
 function set_server_address(address){
-    chrome.storage.sync.set({'server_address': address}, function(res){
+    chrome.storage.sync.set({'server_address': address}, function(){
         server_address = address;
     });
 }
@@ -420,6 +420,8 @@ get_registed_items();
 displayRecordDomains();
 
 // dev area
+let rec_;
+
 function debug_show_storage(st_type){
     if(st_type==='sync'){
         chrome.storage.sync.get(null, function(res){
