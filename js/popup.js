@@ -21,6 +21,22 @@ let DEFAULT_SETTINGS = {
 let setting_contents;
 
 
+function sync_items(){
+    let contents = {};
+    contents['user'] = setting_contents['user'];
+    contents['password'] = setting_contents['password'];
+    contents['data'] = registed_contents;
+    axios.post(
+        setting_contents['server_address']+'/sync',
+        contents)
+        .then(function(response){
+            let data = response['data'];
+            console.log(data);
+        }).catch(function(error){
+            console.log(error);
+        });
+}
+
 function update_tag_options(){
     let tags = Object.keys(registed_contents);
     let tags_element = document.getElementById('selected_tag');
@@ -41,7 +57,7 @@ function get_tag_to_regist(){
     if(tag_input){
         tag = [tag_input];
     }else{
-        tag = document.getElementById('selected_tag').value;
+        tag = [document.getElementById('selected_tag').value];
     }
     return tag
 }
@@ -54,7 +70,7 @@ function regist_current_url(){
             'url': tabs[0].url,
             'title': tabs[0].title,
             'time': time.toLocaleString(),
-            'tag': [tag],
+            'tag': tag,
             'type': ['item']
         };
         regist_url(current_tab_contents);
