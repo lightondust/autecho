@@ -12,9 +12,13 @@ let show_domain_no = 100;
 let show_detail_no = 100;
 let current_tab_contents;
 let registed_contents;
-let settings_status=false;  // false to hide, true to show
-let server_address;
-let DEFAULT_SERVER_ADDRESS='http://localhost:8009';
+let settings_view_status=false;  // false to hide, true to show
+let DEFAULT_SETTINGS = {
+    'server_address': 'http://localhost:8009',
+    'user': '',
+    'password': ''
+};
+let setting_contents;
 
 
 function update_tag_options(){
@@ -358,41 +362,53 @@ function compare_detail_history_statistics(detail1, detail2){
     }
 }
 
-function get_server_address(){
-    chrome.storage.sync.get('server_address', function(res){
-        if(res.server_address){
-            server_address = res.server_address;
-        }else{
-            server_address = DEFAULT_SERVER_ADDRESS;
+function set_settings(settings){
+    chrome.storage.sync.set({'settings': settings}, function(){
+        setting_contents = settings;
+    })
+}
+
+function get_settings(){
+    chrome.storage.sync.get('settings', function(res){
+        setting_contents = res['settings'];
+        for(let [k, v] of Object.entries(DEFAULT_SETTINGS)){
+            if(!setting_contents[k]){
+                setting_contents[k] = v;
+            }
         }
     })
 }
 
-function set_server_address(address){
-    chrome.storage.sync.set({'server_address': address}, function(){
-        server_address = address;
-    });
-}
-
 function switch_setting_view(){
-    get_server_address();
     let setting_area = document.getElementById('setting_contents');
-    let server_address_element = document.getElementById('server_address');
-    server_address_element.value = server_address;
-    if(settings_status){
+    for(let [k, v] of Object.entries(setting_contents)){
+        let el = document.getElementById(k);
+        el.value = v;
+    }
+
+    if(settings_view_status){
     //    hide settings
         setting_area.style.display = 'none';
     }else{
     //    show settings
         setting_area.style.display = 'block';
     }
-    settings_status = !settings_status;
+    settings_view_status = !settings_view_status;
 }
 
-function change_server_address(){
+function change_settings(){
     let server_address_element = document.getElementById('server_address');
     let address = server_address_element.value;
-    set_server_address(address);
+    let user_element = document.getElementById('user');
+    let user_name = user_element.value;
+    let password_element = document.getElementById('password');
+    let password = password_element.value;
+    let settings = {
+        'user': user_name,
+        'password': password,
+        'server_address': address
+    };
+    set_settings(settings);
 }
 
 function changeRecordDomains(){
@@ -405,17 +421,18 @@ let regist_current_url_button = document.getElementById('regist_current_url_butt
 let show_record_button = document.getElementById('show_records_button');
 let show_registed_item_button = document.getElementById('show_registed_items_button');
 let setting_button = document.getElementById('setting_button');
-let change_server_button = document.getElementById('change_server_button');
+let change_setting_button = document.getElementById('change_setting_button');
 let change_record_domains_button = document.getElementById('change_record_domains');
 get_history_button.addEventListener('click', getHistory);
 regist_current_url_button.addEventListener('click', regist_current_url);
 show_record_button.addEventListener('click', display_recorded_urls);
 show_registed_item_button.addEventListener('click', display_registed_items);
 setting_button.addEventListener('click', switch_setting_view);
-change_server_button.addEventListener('click', change_server_address);
+change_setting_button.addEventListener('click', change_settings);
 change_record_domains_button.addEventListener('click', changeRecordDomains);
 
-get_server_address();
+// get_server_address();
+get_settings();
 get_registed_items();
 displayRecordDomains();
 

@@ -13,10 +13,19 @@
       <button class="setting_button" id="setting_button">Settings</button>
       <div id="setting_contents" class="hidden_first">
         <ul>
-          <li>
-            Server:
-            <input id="server_address" type="text"> <button id="change_server_button">change</button>
+          <li class="setting_item">
+            <label>
+              Server:
+              <input id="server_address" type="text">
+            </label>
           </li>
+          <li class="setting_item">
+            <label>
+              user: <input id="user" type="text">
+              password: <input id="password" type="password">
+            </label>
+          </li>
+          <button id="change_setting_button">change</button>
         </ul>
       </div>
     </div>
