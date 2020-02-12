@@ -11,7 +11,7 @@ let detail_id = -1;
 let show_domain_no = 100;
 let show_detail_no = 100;
 let current_tab_contents;
-let registed_contents;
+let registered_contents;
 let settings_view_status=false;  // false to hide, true to show
 let DEFAULT_SETTINGS = {
     'server_address': 'http://localhost:8009',
@@ -20,25 +20,26 @@ let DEFAULT_SETTINGS = {
 };
 let setting_contents;
 
+let registered_contents_sync;
 
 function sync_items(){
     let contents = {};
     contents['user'] = setting_contents['user'];
     contents['password'] = setting_contents['password'];
-    contents['data'] = registed_contents;
+    contents['data'] = registered_contents;
     axios.post(
         setting_contents['server_address']+'/sync',
         contents)
         .then(function(response){
             let data = response['data'];
-            console.log(data);
+            registered_contents_sync = data;
         }).catch(function(error){
             console.log(error);
         });
 }
 
 function update_tag_options(){
-    let tags = Object.keys(registed_contents);
+    let tags = Object.keys(registered_contents);
     let tags_element = document.getElementById('selected_tag');
     tags_element.innerHTML = '';
     for(let i=0; i<tags.length; i++){
@@ -51,7 +52,7 @@ function update_tag_options(){
     tags_element.value = 'none';
 }
 
-function get_tag_to_regist(){
+function get_tag_to_register(){
     let tag;
     let tag_input = document.getElementById('new_tag_name').value;
     if(tag_input){
@@ -62,8 +63,8 @@ function get_tag_to_regist(){
     return tag
 }
 
-function regist_current_url(){
-    let tag = get_tag_to_regist();
+function register_current_url(){
+    let tag = get_tag_to_register();
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         let time = new Date();
         current_tab_contents = {
@@ -73,11 +74,11 @@ function regist_current_url(){
             'tag': tag,
             'type': ['item']
         };
-        regist_url(current_tab_contents);
+        register_url(current_tab_contents);
     });
 }
 
-function regist_url(tab_contents){
+function register_url(tab_contents){
     let contents = {};
     contents[tab_contents['url']] = tab_contents;
     chrome.storage.local.get(contents['url'], function(contents_old){
@@ -86,66 +87,73 @@ function regist_url(tab_contents){
             if(contents_old['type'].includes('record')){
                 contents[tab_contents['url']]['type'].push('record');
             }
-            if(contents_old['tag'].length){
-                for(let i=0; i<contents_old['tag'].length; i++){
-                    if(!contents[tab_contents['url']]['tag'].includes(contents_old['tag'][i])){
-                        contents[tab_contents['url']]['tag'].push(contents_old['tag'][i]);
+            if(contents_old['tag']){
+                if(contents_old['tag'].length) {
+                    for (let i = 0; i < contents_old['tag'].length; i++) {
+                        if (!contents[tab_contents['url']]['tag'].includes(contents_old['tag'][i])) {
+                            contents[tab_contents['url']]['tag'].push(contents_old['tag'][i]);
+                        }
                     }
                 }
             }
         }
         chrome.storage.local.set(contents, function() {
-            display_current_registed_url(tab_contents);
-            display_registed_items();
+            display_current_registered_url(tab_contents);
+            display_registered_items();
         })
     });
 }
 
-function display_current_registed_url(tab_contents){
-    get_registed_items();
-    let registed_url_link_el = document.getElementById('registed_url');
-    let registed_url_description_el = document.getElementById('registed_url_description');
-    let regist_time = document.getElementById('regist_time');
+function display_current_registered_url(tab_contents){
+    get_registered_items();
+    let registered_url_link_el = document.getElementById('registered_url');
+    let registered_url_description_el = document.getElementById('registered_url_description');
+    let registered_time = document.getElementById('register_time');
 
-    registed_url_description_el.innerText = tab_contents['tag']+':';
-    registed_url_link_el.href = tab_contents.url;
-    registed_url_link_el.innerText = tab_contents.title;
-    regist_time.innerText = tab_contents['time'];
+    registered_url_description_el.innerText = tab_contents['tag']+':';
+    registered_url_link_el.href = tab_contents.url;
+    registered_url_link_el.innerText = tab_contents.title;
+    registered_time.innerText = tab_contents['time'];
 }
 
-function get_registed_items(){
-    chrome.storage.local.get(null, function(records){
-        records = object_to_array(records);
-        registed_contents = {};
-        for(let i=0; i<records.length; i++){
-            let rec = records[i];
-            let rec_data = rec['data'];
-            let type = rec_data['type'];
-            if(type.includes('item')) {
-                let tag = rec_data['tag'];
-                if (!tag.length) {
-                    tag = ['none'];
-                }
-                for(let i=0; i<tag.length; i++){
-                    let t = tag[i];
-                    if (registed_contents[t]) {
-                        registed_contents[t].push(rec);
-                    } else {
-                        registed_contents[t] = [rec];
-                    }
+function parse_registered_items_from_storage_records(records_arr){
+    let contents = {};
+    for(let i=0; i<records_arr.length; i++){
+        let rec = records_arr[i];
+        let rec_data = rec['data'];
+        let type = rec_data['type'];
+        if(type.includes('item')) {
+            let tag = rec_data['tag'];
+            if (!tag.length) {
+                tag = ['none'];
+            }
+            for(let i=0; i<tag.length; i++){
+                let t = tag[i];
+                if (contents[t]) {
+                    contents[t].push(rec);
+                } else {
+                    contents[t] = [rec];
                 }
             }
         }
+    }
+    return contents;
+}
+
+function get_registered_items(){
+    chrome.storage.local.get(null, function(records){
+        let records_arr = object_to_array(records);
+        registered_contents = parse_registered_items_from_storage_records(records_arr);
         update_tag_options();
     })
 }
 
-function display_registed_items(){
-    get_registed_items();
+function display_registered_items(){
+    get_registered_items();
     let target_element = document.getElementById('items');
     target_element.innerHTML = '';
 
-    for(let [tag, items] of Object.entries(registed_contents)){
+    for(let [tag, items] of Object.entries(registered_contents)){
         for(let i=0; i<items.length; i++){
             let item = items[i];
             let item_data = item['data'];
@@ -378,6 +386,21 @@ function compare_detail_history_statistics(detail1, detail2){
     }
 }
 
+function objectSort(obj){
+    let keys = Object.keys(obj).sort();
+    let map = {};
+
+    keys.forEach(function(key){
+        map[key] = obj[key];
+    });
+
+    return map;
+}
+
+function compare_data_object(obj_1, obj_2){
+    return JSON.stringify(objectSort(obj_1)) === JSON.stringify(objectSort(obj_2));
+}
+
 function set_settings(settings){
     chrome.storage.sync.set({'settings': settings}, function(){
         setting_contents = settings;
@@ -433,23 +456,23 @@ function changeRecordDomains(){
 }
 
 let get_history_button = document.getElementById('get_history_button');
-let regist_current_url_button = document.getElementById('regist_current_url_button');
+let register_current_url_button = document.getElementById('register_current_url_button');
 let show_record_button = document.getElementById('show_records_button');
-let show_registed_item_button = document.getElementById('show_registed_items_button');
+let show_registered_item_button = document.getElementById('show_registered_items_button');
 let setting_button = document.getElementById('setting_button');
 let change_setting_button = document.getElementById('change_setting_button');
 let change_record_domains_button = document.getElementById('change_record_domains');
 get_history_button.addEventListener('click', getHistory);
-regist_current_url_button.addEventListener('click', regist_current_url);
+register_current_url_button.addEventListener('click', register_current_url);
 show_record_button.addEventListener('click', display_recorded_urls);
-show_registed_item_button.addEventListener('click', display_registed_items);
+show_registered_item_button.addEventListener('click', display_registered_items);
 setting_button.addEventListener('click', switch_setting_view);
 change_setting_button.addEventListener('click', change_settings);
 change_record_domains_button.addEventListener('click', changeRecordDomains);
 
 // get_server_address();
 get_settings();
-get_registed_items();
+get_registered_items();
 displayRecordDomains();
 
 // dev area
