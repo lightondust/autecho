@@ -1,3 +1,21 @@
+# sync storage
+
+- key: "settings"
+```
+{
+    "user": "",
+    "password": "",
+    "server_address": ""
+}
+```
+
+- key: "record_domains"
+```
+["qiita.com", "github.com", "arxiv.org", "scholar.google.com", "stackoverflow.com", "medium.com"]
+```
+
+# local storage
+- key: url
 ```
 {
     "http://html5.cyberlab.info/elements/forms/button-disabled.html": {
@@ -7,7 +25,9 @@
         "type": [
             "record", "item"
         ],
-        "tag": "tag"
+        "tag": [
+            "tag1", "tag2"
+        ],
         "url": "http://html5.cyberlab.info/elements/forms/button-disabled.html"
     }
 }

@@ -22,6 +22,9 @@ let setting_contents;
 
 let registered_contents_sync;
 
+
+// sync section
+
 function sync_items(){
     let contents = {};
     contents['user'] = setting_contents['user'];
@@ -29,14 +32,17 @@ function sync_items(){
     contents['data'] = registered_contents;
     axios.post(
         setting_contents['server_address']+'/sync',
-        contents)
-        .then(function(response){
-            let data = response['data'];
-            registered_contents_sync = data;
-        }).catch(function(error){
-            console.log(error);
-        });
+        contents
+    ).then(function(response){
+        let data = response['data'];
+        registered_contents_sync = data;
+    }).catch(function(error){
+        console.log(error);
+    });
 }
+
+
+// tag section
 
 function update_tag_options(){
     let tags = Object.keys(registered_contents);
@@ -62,6 +68,9 @@ function get_tag_to_register(){
     }
     return tag
 }
+
+
+// items section
 
 function register_current_url(){
     let tag = get_tag_to_register();
@@ -176,6 +185,24 @@ function display_registered_items(){
     }
 }
 
+
+// domain utils
+
+function getDomainSelected(domain_type){
+    let domain_class_name = 'select_' + domain_type + '_domain';
+    let input_element_list = document.getElementsByClassName(domain_class_name);
+    let domain_list = [];
+    historyDomainSelected = [];
+    for(let i=0; i<input_element_list.length; i++){
+        if(input_element_list[i].checked){
+            domain_list.push(input_element_list[i].value);
+        }
+    }
+    return domain_list;
+}
+
+// record section
+
 function display_recorded_urls(){
     chrome.storage.local.get(null, function(recorded_urls){
         let target_element = document.getElementById('records');
@@ -193,19 +220,6 @@ function display_recorded_urls(){
     })
 }
 
-function getDomainSelected(domain_type){
-    let domain_class_name = 'select_' + domain_type + '_domain';
-    let input_element_list = document.getElementsByClassName(domain_class_name);
-    let domain_list = [];
-    historyDomainSelected = [];
-    for(let i=0; i<input_element_list.length; i++){
-        if(input_element_list[i].checked){
-            domain_list.push(input_element_list[i].value);
-        }
-    }
-    return domain_list;
-}
-
 function displayRecordDomains(){
     chrome.storage.sync.get('record_domains', function(res){
         let domains = res['record_domains'];
@@ -221,6 +235,9 @@ function displayRecordDomains(){
         }
     });
 }
+
+
+// history section
 
 function getHistory(){
     // clean old results
@@ -365,6 +382,9 @@ function show_detail(i){
     }
 }
 
+
+// utils section
+
 function object_to_array(obj){
     let arr = [];
     for(let [key, value] of Object.entries(obj)){
@@ -404,6 +424,9 @@ function objectSort(obj){
 function compare_data_object(obj_1, obj_2){
     return JSON.stringify(objectSort(obj_1)) === JSON.stringify(objectSort(obj_2));
 }
+
+
+// settings section
 
 function set_settings(settings){
     chrome.storage.sync.set({'settings': settings}, function(){
@@ -463,6 +486,9 @@ function changeRecordDomains(){
     chrome.storage.sync.set({'record_domains': recordDomainSelected});
 }
 
+
+// initialization section
+
 let get_history_button = document.getElementById('get_history_button');
 let register_current_url_button = document.getElementById('register_current_url_button');
 let show_record_button = document.getElementById('show_records_button');
@@ -478,12 +504,11 @@ setting_button.addEventListener('click', switch_setting_view);
 change_setting_button.addEventListener('click', change_settings);
 change_record_domains_button.addEventListener('click', changeRecordDomains);
 
-// get_server_address();
 get_settings();
 get_registered_items();
 displayRecordDomains();
 
-// dev area
+// debug section
 let rec_;
 
 function debug_show_storage(st_type){
