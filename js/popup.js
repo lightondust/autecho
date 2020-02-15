@@ -18,6 +18,7 @@ let DEFAULT_SETTINGS = {
     'user': '',
     'password': ''
 };
+let AUTCHO_BOARD_URI = '/autechoview';
 let setting_contents;
 
 let registered_contents_sync;
@@ -31,7 +32,7 @@ function sync_items(){
     contents['password'] = setting_contents['password'];
     contents['data'] = registered_contents;
     axios.post(
-        setting_contents['server_address']+'/sync',
+        setting_contents['server_address'] + AUTCHO_BOARD_URI + '/sync',
         contents
     ).then(function(response){
         let data = response['data'];
@@ -490,7 +491,7 @@ function changeRecordDomains(){
 
 function updateServerAddress(){
     let el = document.getElementById('board_link');
-    el.href = setting_contents['server_address'] + '/autechoview';
+    el.href = setting_contents['server_address'] + AUTCHO_BOARD_URI;
 }
 
 // initialization section
