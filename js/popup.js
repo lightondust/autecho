@@ -431,6 +431,7 @@ function compare_data_object(obj_1, obj_2){
 function set_settings(settings){
     chrome.storage.sync.set({'settings': settings}, function(){
         setting_contents = settings;
+        updateServerAddress();
     })
 }
 
@@ -446,7 +447,8 @@ function get_settings(){
                 setting_contents[k] = v;
             }
         }
-    })
+        updateServerAddress();
+    });
 }
 
 function switch_setting_view(){
@@ -486,6 +488,10 @@ function changeRecordDomains(){
     chrome.storage.sync.set({'record_domains': recordDomainSelected});
 }
 
+function updateServerAddress(){
+    let el = document.getElementById('board_link');
+    el.href = setting_contents['server_address'] + '/autechoview';
+}
 
 // initialization section
 

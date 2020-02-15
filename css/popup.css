@@ -69,11 +69,15 @@ button{
 }
 
 .setting_button{
-    text-align: right;
     left: 500px;
     position: relative;
     background-color: lightgrey;
     height: 30px;
+}
+
+.board_link{
+    left: 500px;
+    position: relative;
 }
 
 #history_detail{
