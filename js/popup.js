@@ -210,10 +210,14 @@ function displayRecordDomains(){
     chrome.storage.sync.get('record_domains', function(res){
         let domains = res['record_domains'];
         let domain_class_name = 'select_record_domain';
-        let input_element_list = document.getElementsByClassName(domain_class_name);
-        for(let i=0; i<input_element_list.length; i++){
-            let el = input_element_list[i];
-            el.checked = domains.includes(el.value);
+        if(domains){
+            let input_element_list = document.getElementsByClassName(domain_class_name);
+            for(let i=0; i<input_element_list.length; i++){
+                let el = input_element_list[i];
+                el.checked = domains.includes(el.value);
+            }
+        }else{
+            changeRecordDomains();
         }
     });
 }
@@ -409,7 +413,11 @@ function set_settings(settings){
 
 function get_settings(){
     chrome.storage.sync.get('settings', function(res){
-        setting_contents = res['settings'];
+        if(res['settings']){
+            setting_contents = res['settings'];
+        }else{
+            setting_contents = {};
+        }
         for(let [k, v] of Object.entries(DEFAULT_SETTINGS)){
             if(!setting_contents[k]){
                 setting_contents[k] = v;
