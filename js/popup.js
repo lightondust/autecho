@@ -509,6 +509,7 @@ function updateServerAddress(){
 let registered_contents_sync;
 
 function mergeItems(){
+    console.log('merge');
     let contents = {};
     contents['user'] = setting_contents['user'];
     contents['password'] = setting_contents['password'];
@@ -519,12 +520,14 @@ function mergeItems(){
     ).then(function(response){
         let data = response['data'];
         registered_contents_sync = data;
+        syncStorage(data);
     }).catch(function(error){
         console.log(error);
     });
 }
 
 function syncItems(){
+    console.log('sync');
     let contents = {};
     contents['user'] = setting_contents['user'];
     contents['password'] = setting_contents['password'];
@@ -534,6 +537,7 @@ function syncItems(){
     ).then(function(response){
         let data = response['data'];
         registered_contents_sync = data;
+        syncStorage(data);
     }).catch(function(error){
         console.log(error);
     });
@@ -541,16 +545,33 @@ function syncItems(){
 
 function syncStorage(dataArray){
     chrome.storage.local.get(null, function(records){
+        let urlsInServer = new Set();
         for(let i=0; i<dataArray.length; i++){
             let d = dataArray[i];
             let url = d['key'];
+            urlsInServer.add(url);
             let rec = d['data'];
-            let rec_storage = records[url];
-            if(rec_storage){
-                if(!compare_data_object(rec, rec_storage)){
+
+            let recStorage = records[url];
+
+            let contentsToStore = {};
+            contentsToStore[url] = rec;
+
+            if(recStorage){
+                if(!compare_data_object(rec, recStorage)){
                     console.log('diff:'+url);
-                }else{
-                    console.log('same:'+url);
+                    chrome.storage.local.set(contentsToStore);
+                }
+            }else{
+                console.log('new:'+url);
+                chrome.storage.local.set(contentsToStore);
+            }
+        }
+
+        for(let [k, v] of Object.entries(records)){
+            if(v['type'].includes('item')){
+                if(!urlsInServer.has(k)){
+                    chrome.storage.local.remove(k);
                 }
             }
         }
