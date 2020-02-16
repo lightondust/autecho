@@ -18,29 +18,8 @@ let DEFAULT_SETTINGS = {
     'user': '',
     'password': ''
 };
-let AUTCHO_BOARD_URI = '/autechoview';
 let setting_contents;
 
-let registered_contents_sync;
-
-
-// sync section
-
-function sync_items(){
-    let contents = {};
-    contents['user'] = setting_contents['user'];
-    contents['password'] = setting_contents['password'];
-    contents['data'] = registered_contents;
-    axios.post(
-        setting_contents['server_address'] + AUTCHO_BOARD_URI + '/sync',
-        contents
-    ).then(function(response){
-        let data = response['data'];
-        registered_contents_sync = data;
-    }).catch(function(error){
-        console.log(error);
-    });
-}
 
 
 // tag section
@@ -433,7 +412,38 @@ function set_settings(settings){
     chrome.storage.sync.set({'settings': settings}, function(){
         setting_contents = settings;
         updateServerAddress();
+        if(settings['user']){
+            checkUser();
+        }
     })
+}
+
+function checkUser(){
+    axios.post(
+        setting_contents['server_address'] + '/login',
+        setting_contents
+    ).then(function(response){
+        let data = response['data'];
+        if(data['results']){
+            setSync(true);
+            let if_merge = document.getElementById('if_merge').checked;
+            if(if_merge){
+                console.log('merge items');
+                mergeItems();
+            }else{
+                syncItems();
+            }
+        }else{
+            setSync(false);
+        }
+    }).catch(function(error){
+        console.log(error);
+    });
+
+}
+
+function setSync(v){
+    chrome.storage.sync.set({'sync': v});
 }
 
 function get_settings(){
@@ -491,8 +501,62 @@ function changeRecordDomains(){
 
 function updateServerAddress(){
     let el = document.getElementById('board_link');
-    el.href = setting_contents['server_address'] + AUTCHO_BOARD_URI;
+    el.href = setting_contents['server_address'];
 }
+
+
+// merge and sync section
+let registered_contents_sync;
+
+function mergeItems(){
+    let contents = {};
+    contents['user'] = setting_contents['user'];
+    contents['password'] = setting_contents['password'];
+    contents['data'] = registered_contents;
+    axios.post(
+        setting_contents['server_address'] + '/merge',
+        contents
+    ).then(function(response){
+        let data = response['data'];
+        registered_contents_sync = data;
+    }).catch(function(error){
+        console.log(error);
+    });
+}
+
+function syncItems(){
+    let contents = {};
+    contents['user'] = setting_contents['user'];
+    contents['password'] = setting_contents['password'];
+    axios.post(
+        setting_contents['server_address'] + '/items',
+        contents
+    ).then(function(response){
+        let data = response['data'];
+        registered_contents_sync = data;
+    }).catch(function(error){
+        console.log(error);
+    });
+}
+
+function syncStorage(dataArray){
+    chrome.storage.local.get(null, function(records){
+        for(let i=0; i<dataArray.length; i++){
+            let d = dataArray[i];
+            let url = d['key'];
+            let rec = d['data'];
+            let rec_storage = records[url];
+            if(rec_storage){
+                if(!compare_data_object(rec, rec_storage)){
+                    console.log('diff:'+url);
+                }else{
+                    console.log('same:'+url);
+                }
+            }
+        }
+    });
+}
+
 
 // initialization section
 

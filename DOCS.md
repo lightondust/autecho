@@ -1,6 +1,7 @@
 # sync storage
 
 - key: "settings"
+
 ```
 {
     "user": "",
@@ -10,9 +11,14 @@
 ```
 
 - key: "record_domains"
+
 ```
 ["qiita.com", "github.com", "arxiv.org", "scholar.google.com", "stackoverflow.com", "medium.com"]
 ```
+
+- key: 'sync'  
+
+boolean
 
 # local storage
 - key: url
