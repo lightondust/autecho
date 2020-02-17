@@ -411,10 +411,10 @@ function compare_data_object(obj_1, obj_2){
 function set_settings(settings){
     chrome.storage.sync.set({'settings': settings}, function(){
         setting_contents = settings;
-        updateServerAddress();
         if(settings['user']){
             checkUser();
         }
+        get_settings();
     })
 }
 
@@ -443,7 +443,9 @@ function checkUser(){
 }
 
 function setSync(v){
-    chrome.storage.sync.set({'sync': v});
+    chrome.storage.sync.set({'sync': v}, function () {
+        updateSyncStatus();
+    });
 }
 
 function get_settings(){
@@ -459,6 +461,7 @@ function get_settings(){
             }
         }
         updateServerAddress();
+        updateSyncStatus();
     });
 }
 
@@ -502,6 +505,18 @@ function changeRecordDomains(){
 function updateServerAddress(){
     let el = document.getElementById('board_link');
     el.href = setting_contents['server_address'];
+}
+
+function updateSyncStatus(){
+    chrome.storage.sync.get('sync', function(res){
+        let el = document.getElementById('sync_status');
+        let syncStatus = res['sync'];
+        if(syncStatus){
+            el.innerText = 'sync: O';
+        }else{
+            el.innerText = 'sync: X';
+        }
+    });
 }
 
 
