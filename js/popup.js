@@ -11,7 +11,8 @@ let detail_id = -1;
 let show_domain_no = 100;
 let show_detail_no = 100;
 let current_tab_contents;
-let registered_contents;
+let registeredContentsToDisplay;
+let registeredContentsList;
 let settings_view_status=false;  // false to hide, true to show
 let DEFAULT_SETTINGS = {
     'server_address': 'http://localhost:8009',
@@ -19,13 +20,13 @@ let DEFAULT_SETTINGS = {
     'password': ''
 };
 let setting_contents;
-
+let ifSync;
 
 
 // tag section
 
 function update_tag_options(){
-    let tags = Object.keys(registered_contents);
+    let tags = Object.keys(registeredContentsToDisplay);
     let tags_element = document.getElementById('selected_tag');
     tags_element.innerHTML = '';
     for(let i=0; i<tags.length; i++){
@@ -70,6 +71,8 @@ function register_current_url(){
 function register_url(tab_contents){
     let contents = {};
     contents[tab_contents['url']] = tab_contents;
+
+    // merge exists records
     chrome.storage.local.get(contents['url'], function(contents_old){
         if(contents_old[tab_contents['url']]){
             contents_old = contents_old[tab_contents['url']];
@@ -86,11 +89,39 @@ function register_url(tab_contents){
                 }
             }
         }
-        chrome.storage.local.set(contents, function() {
-            display_current_registered_url(tab_contents);
-            display_registered_items();
-        })
+
+        // sync to server or just save
+        if(ifSync){
+            let messageToServer = {};
+            messageToServer['user'] = setting_contents['user'];
+            messageToServer['password'] = setting_contents['password'];
+            messageToServer['data'] = object_to_array(contents);
+
+            axios.post(
+                setting_contents['server_address'] + '/register',
+                messageToServer
+            ).then(
+                function (response) {
+                    if(response['data']['results']){
+                        setItemContents(contents);
+                    }else{
+                        console.log('some thine wrong on communication with server, in register url')
+                    }
+            }).catch(function(error){
+                console.log(error);
+            });
+        }else{
+            setItemContents(contents);
+        }
     });
+}
+
+function setItemContents(contents_to_set){
+    chrome.storage.local.set(contents_to_set, function() {
+        let contentsKey = Object.keys(contents_to_set)[0];
+        display_current_registered_url(contents_to_set[contentsKey]);
+        display_registered_items();
+    })
 }
 
 function display_current_registered_url(tab_contents){
@@ -110,29 +141,40 @@ function parse_registered_items_from_storage_records(records_arr){
     for(let i=0; i<records_arr.length; i++){
         let rec = records_arr[i];
         let rec_data = rec['data'];
-        let type = rec_data['type'];
-        if(type.includes('item')) {
-            let tag = rec_data['tag'];
-            if (!tag.length) {
-                tag = ['none'];
-            }
-            for(let i=0; i<tag.length; i++){
-                let t = tag[i];
-                if (contents[t]) {
-                    contents[t].push(rec);
-                } else {
-                    contents[t] = [rec];
-                }
+        let tag = rec_data['tag'];
+        if (!tag.length) {
+            tag = ['none'];
+        }
+        for(let i=0; i<tag.length; i++){
+            let t = tag[i];
+            if (contents[t]) {
+                contents[t].push(rec);
+            } else {
+                contents[t] = [rec];
             }
         }
     }
     return contents;
 }
 
+function filterItemsFromStorageRecords(recordsArr){
+    let recordItems=[];
+    for(let i=0; i<recordsArr.length; i++){
+        let rec = recordsArr[i];
+        let rec_data = rec['data'];
+        let type = rec_data['type'];
+        if(type.includes('item')){
+            recordItems.push(rec);
+        }
+    }
+    return recordItems;
+}
+
 function get_registered_items(){
     chrome.storage.local.get(null, function(records){
         let records_arr = object_to_array(records);
-        registered_contents = parse_registered_items_from_storage_records(records_arr);
+        registeredContentsList = filterItemsFromStorageRecords(records_arr);
+        registeredContentsToDisplay = parse_registered_items_from_storage_records(registeredContentsList);
         update_tag_options();
     })
 }
@@ -142,7 +184,7 @@ function display_registered_items(){
     let target_element = document.getElementById('items');
     target_element.innerHTML = '';
 
-    for(let [tag, items] of Object.entries(registered_contents)){
+    for(let [tag, items] of Object.entries(registeredContentsToDisplay)){
         for(let i=0; i<items.length; i++){
             let item = items[i];
             let item_data = item['data'];
@@ -509,9 +551,9 @@ function updateServerAddress(){
 
 function updateSyncStatus(){
     chrome.storage.sync.get('sync', function(res){
+        ifSync = res['sync'];
         let el = document.getElementById('sync_status');
-        let syncStatus = res['sync'];
-        if(syncStatus){
+        if(ifSync){
             el.innerText = 'sync: O';
         }else{
             el.innerText = 'sync: X';
@@ -528,7 +570,7 @@ function mergeItems(){
     let contents = {};
     contents['user'] = setting_contents['user'];
     contents['password'] = setting_contents['password'];
-    contents['data'] = registered_contents;
+    contents['data'] = registeredContentsList;
     axios.post(
         setting_contents['server_address'] + '/merge',
         contents
