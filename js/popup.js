@@ -64,16 +64,17 @@ function register_current_url(){
             'tag': tag,
             'type': ['item']
         };
-        register_url(current_tab_contents);
+        register_url(current_tab_contents, tabs[0].id);
     });
 }
 
-function register_url(tab_contents){
+function register_url(tab_contents, tabId){
     let contents = {};
     contents[tab_contents['url']] = tab_contents;
 
     // merge exists records
     chrome.storage.local.get(contents['url'], function(contents_old){
+        // merge old contents
         if(contents_old[tab_contents['url']]){
             contents_old = contents_old[tab_contents['url']];
             if(contents_old['type'].includes('record')){
@@ -88,35 +89,49 @@ function register_url(tab_contents){
                     }
                 }
             }
+            if(contents_old['lang']){
+                contents[tab_contents['url']]['lang'] = contents_old['lange'];
+            }
         }
 
-        // sync to server or just save
-        if(ifSync){
-            let messageToServer = {};
-            messageToServer['user'] = setting_contents['user'];
-            messageToServer['password'] = setting_contents['password'];
-            messageToServer['data'] = object_to_array(contents);
-
-            axios.post(
-                setting_contents['server_address'] + '/register',
-                messageToServer
-            ).then(
-                function (response) {
-                    if(response['data']['results']){
-                        setItemContents(contents);
-                    }else{
-                        console.log('some thine wrong on communication with server, in register url')
-                    }
-            }).catch(function(error){
-                console.log(error);
-            });
-        }else{
+        if(contents[tab_contents['url']]['lang']){
             setItemContents(contents);
+        }else{
+            chrome.tabs.sendMessage(tabId, {'action': 'get_language'}, function(response){
+                contents[tab_contents['url']]['lang'] = response['data'];
+                setItemContents(contents);
+            });
         }
     });
 }
 
-function setItemContents(contents_to_set){
+function setItemContents(cont){
+    // sync to server or just save
+    if(ifSync){
+        let messageToServer = {};
+        messageToServer['user'] = setting_contents['user'];
+        messageToServer['password'] = setting_contents['password'];
+        messageToServer['data'] = object_to_array(cont);
+
+        axios.post(
+            setting_contents['server_address'] + '/register',
+            messageToServer
+        ).then(
+            function (response) {
+                if(response['data']['results']){
+                    setItemContentsToStorage(cont);
+                }else{
+                    console.log('some thine wrong on communication with server, in register url')
+                }
+            }).catch(function(error){
+            console.log(error);
+        });
+    }else{
+        setItemContentsToStorage(cont);
+    }
+}
+
+function setItemContentsToStorage(contents_to_set){
     chrome.storage.local.set(contents_to_set, function() {
         let contentsKey = Object.keys(contents_to_set)[0];
         display_current_registered_url(contents_to_set[contentsKey]);
