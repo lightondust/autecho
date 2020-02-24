@@ -570,6 +570,7 @@ function updateSyncStatus(){
         let el = document.getElementById('sync_status');
         if(ifSync){
             el.innerText = 'sync: O';
+            syncItems();
         }else{
             el.innerText = 'sync: X';
         }
