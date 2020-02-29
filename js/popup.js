@@ -151,6 +151,7 @@ function display_current_registered_url(tab_contents){
     registered_time.innerText = tab_contents['time'];
 }
 
+// re-arrange data in order to display
 function parse_registered_items_from_storage_records(records_arr){
     let contents = {};
     for(let i=0; i<records_arr.length; i++){
@@ -172,13 +173,13 @@ function parse_registered_items_from_storage_records(records_arr){
     return contents;
 }
 
-function filterItemsFromStorageRecords(recordsArr){
+function filterItemsFromStorageRecords(recordsArr, itemType){
     let recordItems=[];
     for(let i=0; i<recordsArr.length; i++){
         let rec = recordsArr[i];
         let rec_data = rec['data'];
         let type = rec_data['type'];
-        if(type.includes('item')){
+        if(type.includes(itemType)){
             recordItems.push(rec);
         }
     }
@@ -188,7 +189,7 @@ function filterItemsFromStorageRecords(recordsArr){
 function get_registered_items(){
     chrome.storage.local.get(null, function(records){
         let records_arr = object_to_array(records);
-        registeredContentsList = filterItemsFromStorageRecords(records_arr);
+        registeredContentsList = filterItemsFromStorageRecords(records_arr, 'item');
         registeredContentsToDisplay = parse_registered_items_from_storage_records(registeredContentsList);
         update_tag_options();
     })
@@ -242,19 +243,42 @@ function getDomainSelected(domain_type){
 
 function display_recorded_urls(){
     chrome.storage.local.get(null, function(recorded_urls){
-        let target_element = document.getElementById('records');
-        target_element.innerHTML = '';
         recorded_urls = object_to_array(recorded_urls);
-        for(let i=0; i<recorded_urls.length; i++){
-            let item = recorded_urls[i];
-            let item_data = item['data'];
-            if(item_data['type'].includes('record')){
-                let item_element = document.createElement('li');
-                item_element.innerText = item_data.title;
-                target_element.appendChild(item_element);
-            }
-        }
+        let recordedItems = filterItemsFromStorageRecords(recorded_urls, 'record');
+        renderRecordedItems(recordedItems);
     })
+}
+
+function renderRecordedItems(recordedItemsToRender){
+    let target_element = document.getElementById('records');
+    target_element.innerHTML = '';
+    for(let i=0; i<recordedItemsToRender.length; i++){
+        let item = recordedItemsToRender[i];
+        let item_data = item['data'];
+        let item_element = document.createElement('li');
+        item_element.innerText = item_data.title;
+        target_element.appendChild(item_element);
+    }
+}
+
+function syncRecords(){
+    chrome.storage.local.get(null, function(recorded_urls) {
+        recorded_urls = object_to_array(recorded_urls);
+        let recordedItems = filterItemsFromStorageRecords(recorded_urls, 'record');
+
+        let contents = {};
+        contents['user'] = setting_contents['user'];
+        contents['password'] = setting_contents['password'];
+        contents['data'] = recordedItems;
+        axios.post(
+            setting_contents['server_address'] + '/update_records',
+            contents
+        ).then(function (res) {
+            // pass
+        }).catch(function(error){
+            console.log(error);
+        });
+    });
 }
 
 function displayRecordDomains(){
@@ -657,6 +681,7 @@ function syncStorage(dataArray){
 let get_history_button = document.getElementById('get_history_button');
 let register_current_url_button = document.getElementById('register_current_url_button');
 let show_record_button = document.getElementById('show_records_button');
+let syncRecordButton = document.getElementById('sync_records_button');
 let show_registered_item_button = document.getElementById('show_registered_items_button');
 let setting_button = document.getElementById('setting_button');
 let change_setting_button = document.getElementById('change_setting_button');
@@ -664,6 +689,7 @@ let change_record_domains_button = document.getElementById('change_record_domain
 get_history_button.addEventListener('click', getHistory);
 register_current_url_button.addEventListener('click', register_current_url);
 show_record_button.addEventListener('click', display_recorded_urls);
+syncRecordButton.addEventListener('click', syncRecords);
 show_registered_item_button.addEventListener('click', display_registered_items);
 setting_button.addEventListener('click', switch_setting_view);
 change_setting_button.addEventListener('click', change_settings);

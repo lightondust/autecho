@@ -17,8 +17,8 @@ window.onload = function(){
         'data': getLanguage(),
         'url': location.href
     };
-    console.log(message);
+    // console.log(message);
     chrome.runtime.sendMessage(message, function(res){
-        console.log(res);
+        // console.log(res);
     });
 };

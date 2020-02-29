@@ -73,16 +73,16 @@ chrome.tabs.onUpdated.addListener( function( tabId,  changeInfo,  tab) {
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse){
-        if(request['action']==='send_page_information'){
+        if(request['action']==='send_page_information') {
             console.log(request);
             let url = request['url'];
-            if(url_domain_filter(url)){
-                chrome.storage.local.get(url, function(rec_old){
+            if (url_domain_filter(url)) {
+                chrome.storage.local.get(url, function (rec_old) {
                     rec_old[url]['lang'] = request['data'];
                     setContents(rec_old);
                 })
             }
+            sendResponse({'results': 'OK'});
         }
-        sendResponse({'results': 'OK'});
     }
 );
