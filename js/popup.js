@@ -567,7 +567,7 @@ function switch_setting_view(){
 
 function change_settings(){
     let server_address_element = document.getElementById('server_address');
-    let address = server_address_element.value+'/';
+    let address = server_address_element.value;
     let user_element = document.getElementById('user');
     let user_name = user_element.value;
     let password_element = document.getElementById('password');
@@ -587,7 +587,9 @@ function changeRecordDomains(){
 
 function updateServerAddress(){
     let el = document.getElementById('board_link');
-    el.href = setting_contents['server_address'];
+    if(!setting_contents['server_address'].endsWith('/')){
+        el.href = setting_contents['server_address']+'/';
+    }
 }
 
 function updateSyncStatus(){
