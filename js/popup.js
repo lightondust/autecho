@@ -679,8 +679,27 @@ function syncStorage(dataArray){
 
 function displayRecentTag(){
     chrome.storage.sync.get('last_tag', function(res){
-        document.getElementById('selected_tag').value = res.last_tag;
+        if(res['last_tag']){
+            document.getElementById('selected_tag').value = res.last_tag;
+        }
     })
+}
+
+function displayCurrentTabInformation(){
+    chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+        let url = tabs[0].url;
+        let title = tabs[0].title;
+
+        chrome.storage.local.get(url, function(res){
+            let tab_info_el = document.getElementById('current_tab_link');
+            tab_info_el.innerText = title;
+            tab_info_el.href = url;
+
+            if(res[url]){
+                document.getElementById('current_tab_tag_information').innerText = res[url]['tag'];
+            }
+        })
+    });
 }
 
 // initialization section
@@ -706,6 +725,7 @@ get_settings();
 get_registered_items();
 displayRecordDomains();
 displayRecentTag();
+displayCurrentTabInformation();
 
 // debug section
 let rec_;
