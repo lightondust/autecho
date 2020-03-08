@@ -20,6 +20,10 @@
 
 boolean
 
+- key: 'last_tag'
+
+'tag_id'(tag_name)
+
 # local storage
 - key: url
 ```

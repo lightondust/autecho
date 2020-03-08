@@ -21,6 +21,7 @@ let DEFAULT_SETTINGS = {
 };
 let setting_contents;
 let ifSync;
+let tagRecent;
 
 
 // tag section
@@ -54,14 +55,14 @@ function get_tag_to_register(){
 // items section
 
 function register_current_url(){
-    let tag = get_tag_to_register();
+    tagRecent = get_tag_to_register();
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         let time = new Date();
         current_tab_contents = {
             'url': tabs[0].url,
             'title': tabs[0].title,
             'time': time.toLocaleString(),
-            'tag': tag,
+            'tag': tagRecent,
             'type': ['item']
         };
         register_url(current_tab_contents, tabs[0].id);
@@ -136,6 +137,7 @@ function setItemContentsToStorage(contents_to_set){
         let contentsKey = Object.keys(contents_to_set)[0];
         display_current_registered_url(contents_to_set[contentsKey]);
         display_registered_items();
+        chrome.storage.sync.set({'last_tag': tagRecent[0]}, function () {});
     })
 }
 
@@ -565,7 +567,7 @@ function switch_setting_view(){
 
 function change_settings(){
     let server_address_element = document.getElementById('server_address');
-    let address = server_address_element.value;
+    let address = server_address_element.value+'/';
     let user_element = document.getElementById('user');
     let user_name = user_element.value;
     let password_element = document.getElementById('password');
@@ -675,6 +677,11 @@ function syncStorage(dataArray){
     });
 }
 
+function displayRecentTag(){
+    chrome.storage.sync.get('last_tag', function(res){
+        document.getElementById('selected_tag').value = res.last_tag;
+    })
+}
 
 // initialization section
 
@@ -698,6 +705,7 @@ change_record_domains_button.addEventListener('click', changeRecordDomains);
 get_settings();
 get_registered_items();
 displayRecordDomains();
+displayRecentTag();
 
 // debug section
 let rec_;
