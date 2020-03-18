@@ -587,9 +587,19 @@ function changeRecordDomains(){
 
 function updateServerAddress(){
     let el = document.getElementById('board_link');
-    if(!setting_contents['server_address'].endsWith('/')){
-        el.href = setting_contents['server_address']+'/';
+    let serverAddress = setting_contents['server_address'];
+    let boardAddress;
+    if(!serverAddress.endsWith('/')){
+        boardAddress = serverAddress + '/';
+    }else{
+        boardAddress = serverAddress;
     }
+
+    if(boardAddress.endsWith('/api/')){
+        boardAddress = boardAddress.replace('/api/', '/board/')
+    }
+
+    el.href = boardAddress;
 }
 
 function updateSyncStatus(){
